@@ -1,0 +1,73 @@
+name: E2E tests
+
+on:
+  workflow_call:
+    inputs:
+      use_playwright:
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    needs: containerise
+    env:
+      USE_ENV_TEST: "1"
+      SECRET_KEY: django-insecure_not-a-secret
+      ALLOWED_HOSTS: 127.0.0.1,::1
+      CSRF_TRUSTED_ORIGINS: http://127.0.0.1
+      DATABASE_URL: postgres://django_e2e_benchmarks:password@host.docker.internal:5432/django_e2e_benchmarks
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: django_e2e_benchmarks
+          POSTGRES_USER: django_e2e_benchmarks
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.6.17"
+
+      - name: Apply migrations and seed database
+        run: |
+          docker run --rm \
+            --add-host=host.docker.internal:host-gateway \
+            --env USE_ENV_TEST \
+            --env SECRET_KEY \
+            --env ALLOWED_HOSTS \
+            --env CSRF_TRUSTED_ORIGINS \
+            --env DATABASE_URL \
+            ${{ needs.containerise.outputs.image_address }} \
+            /bin/bash -c "python manage.py migrate && python manage.py seed_database"
+
+      - name: Run webapp in the background
+        run: |
+          docker run --detach \
+            --add-host=host.docker.internal:host-gateway \
+            --env USE_ENV_TEST \
+            --env SECRET_KEY \
+            --env ALLOWED_HOSTS \
+            --env CSRF_TRUSTED_ORIGINS \
+            --env DATABASE_URL \
+            --env PORT=8000 \
+            --publish 8000:8000 \
+            --volume django_e2e_benchmarks_static:/app/static \
+            ${{ needs.containerise.outputs.image_address }}
+
+      - run: uv sync --group=test
+
+      - if: ${{ inputs.use_playwright }}
+        run: uv run playwright install --with-deps chromium
+
+      - if: ${{ inputs.use_playwright }}
+        run: uv run pytest tests_e2e/playwright_e2e/
