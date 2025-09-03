@@ -44,10 +44,12 @@ jobs:
     needs: containerise
     uses: ./.github/workflows/_e2e.yaml
     with:
+      image_address: ${{ needs.containerise.outputs.image_address }}
       use_playwright: true
 
   pydoll_e2e:
     needs: containerise
     uses: ./.github/workflows/_e2e.yaml
     with:
+      image_address: ${{ needs.containerise.outputs.image_address }}
       use_pydoll: true
