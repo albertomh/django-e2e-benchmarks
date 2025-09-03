@@ -1,9 +1,23 @@
-name: E2E tests
+# Run playwright or pydoll E2E tests in CI.
+#
+# Usage:
+# ```
+# jobs:
+#   playwright_e2e:
+#     needs: containerise
+#     uses: ./.github/workflows/_e2e.yaml
+#     with:
+#       use_playwright: true
+# ```
 
 on:
   workflow_call:
     inputs:
       use_playwright:
+        required: true
+        type: boolean
+        default: false
+      use_pydoll:
         required: true
         type: boolean
         default: false
@@ -71,3 +85,6 @@ jobs:
 
       - if: ${{ inputs.use_playwright }}
         run: uv run pytest tests_e2e/playwright_e2e/
+
+      - if: ${{ inputs.use_pydoll }}
+        run: uv run pytest tests_e2e/pydoll_e2e/

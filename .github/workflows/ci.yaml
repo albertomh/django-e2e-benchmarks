@@ -45,3 +45,9 @@ jobs:
     uses: ./.github/workflows/_e2e.yaml
     with:
       use_playwright: true
+
+  pydoll_e2e:
+    needs: containerise
+    uses: ./.github/workflows/_e2e.yaml
+    with:
+      use_pydoll: true
