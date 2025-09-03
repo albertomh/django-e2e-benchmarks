@@ -1,0 +1,113 @@
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+[project]
+name = "django_e2e_benchmarks"
+version = "0.0.0"
+description = ""
+authors = [
+  {name = "Alberto Morón Hernández", email = "alberto.moronh@gmail.com"}
+]
+readme = "README.md"
+# create 'LICENSE' file and uncomment below line
+# license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = [
+    "django-alive>=2.0.0,<3.0.0",
+    "django>=5.2,<6.0",
+    "django-allauth>=65.4.1,<66.0.0",
+    "django-csp>=4.0,<5.0",
+    "django-htmx>=1.23.0,<2.0.0",
+    "django-linear-migrations>=2.16.0,<3.0.0",
+    "django-permissions-policy>=4.25.0,<5.0.0",
+    "django-structlog>=9.0.1,<10.0.0",
+    "django-version-checks>=1.13.0,<2.0.0",
+    "environs[django]>=14.1.0,<15.0.0",
+    "gunicorn>=23.0.0,<24.0.0",
+    "psycopg[binary]>=3.2.4,<4.0.0",
+    "psycopg-pool>=3.2.6,<4.0.0",
+    "whitenoise[brotli]>=6.8.2,<7.0.0",
+]
+
+[dependency-groups]
+test = [
+    "beautifulsoup4>=4.13.3,<5.0.0",
+    "coverage>=7.6.7",
+    "factory-boy>=3.3.3,<4.0.0",
+    "parameterized>=0.9.0,<1.0.0",
+    "pytest-playwright>=0.7.0",
+]
+dev = [
+    "django-browser-reload>=1.17.0",
+    "django-debug-toolbar>=5.0.1",
+    "ipdb>=0.13.13",
+    "ipython>=9.2.0",
+    "rich>=13.9.4",
+]
+
+[tool.setuptools.packages.find]
+# allow `pip install -e .` to find the project package
+include = ["django_e2e_benchmarks"]
+
+[tool.ruff]
+exclude = [".pdbrc"]
+indent-width = 4
+line-length = 90
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = []
+select = [
+    # flake8-bugbear
+    "B",
+    # pydocstyle
+    "E",
+    # isort
+    "I",
+    # flake8-no-pep420
+    "INP",
+    # Pyflakes
+    "F",
+    #flake8-logging-format
+    "G",
+    # flake8-logging
+    "LOG",
+    # flake8-bandit
+    "S",
+    # flake8-tidy-imports
+    "TID",
+    # flake8-print
+    "T20",
+    # pycodestyle warnings
+    "W",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**.py" = ["S"]
+"tests_e2e/**.py" = ["S"]
+"**/tests/**.py" = ["S"]
+"django_e2e_benchmarks/settings.py" = ["E501"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"django_e2e_benchmarks.settings".msg = "Do not import project settings module - use `from django.conf import settings` instead"
+
+[tool.coverage.report]
+omit = [
+  "*/tests/*"
+]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "if settings.debug",
+]
+
+[tool.coverage.run]
+source = [
+  "./django_e2e_benchmarks/",
+]
+omit = [
+  "manage.py",
+  "*/tests/*",
+  "django_e2e_benchmarks/asgi.py",
+  "django_e2e_benchmarks/wsgi.py",
+  "django_e2e_benchmarks/settings.py",
+]

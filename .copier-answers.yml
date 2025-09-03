@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v3.9.0
+_src_path: djereo
+author_email: alberto.moronh@gmail.com
+author_name: Alberto Morón Hernández
+django_version: '5.2'
+is_github_project: true
+postgres_version: '17'
+project_name: django_e2e_benchmarks
+python_version: '3.12'
+use_django_waffle: false
+use_htmx: true

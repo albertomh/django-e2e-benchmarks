@@ -1,0 +1,134 @@
+{% load django_htmx %}<!DOCTYPE html>
+<html lang="en">
+
+{% load allauth static %}
+
+<head>
+    <title>
+        {% block head_title %}{% endblock %} | django_e2e_benchmarks
+    </title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{% static 'django_e2e_benchmarks/mvp.css' %}">
+
+    <style nonce="{{ request.csp_nonce }}">
+        header {
+            padding-bottom: 0;
+        }
+        header > nav {
+            margin-bottom: 0
+        }
+        nav > a {
+            font-size: large;
+        }
+        h1 {
+            font-size: xx-large;
+        }
+        nav b {
+            font-size: x-large;
+        }
+        .inactive-link {
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+    {% block extra_head_style %}{% endblock %}
+
+
+    {% if debug %}
+        {% htmx_script minified=False %}
+    {% else %}
+        {% htmx_script %}
+    {% endif %}
+    <meta name="htmx-config" content='{"inlineStyleNonce": "{{ request.csp_nonce }}"}'>
+    <script></script>
+
+    <meta charset="utf-8">
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Title</title>
+</head>
+
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+
+    <header>
+        <nav>
+            <a href="/">django_e2e_benchmarks</a>
+                <ul>
+                {% if user.is_authenticated %}
+                    <li>{{ user.email }} ▼
+                        <ul>
+                            {% url 'account_email' as email_url_ %}
+                            {% if email_url_ %}
+                                <li>
+                                    <a href="{{ email_url_ }}">Change email</a>
+                                </li>
+                            {% endif %}
+                            {% url 'account_change_password' as change_password_url_ %}
+                            {% if change_password_url_ %}
+                                <li>
+                                    <a href="{{ change_password_url_ }}">Change password</a>
+                                </li>
+                            {% endif %}
+                            {% comment %}
+                            {% url 'socialaccount_connections' as connections_url_ %}
+                            {% if connections_url_ %}
+                                <li>
+                                    <a href="{{ connections_url_ }}">Account connections</a>
+                                </li>
+                            {% endif %}
+                            {% endcomment %}
+                            {% url 'mfa_index' as mfa_url_ %}
+                            {% if mfa_url_ %}
+                                <li>
+                                    <a href="{{ mfa_url_ }}">Two-Factor Authentication</a>
+                                </li>
+                            {% endif %}
+                            {% url 'usersessions_list' as usersessions_list_url_ %}
+                            {% if usersessions_list_url_ %}
+                                <li>
+                                    <a href="{{ usersessions_list_url_ }}">Sessions</a>
+                                </li>
+                            {% endif %}
+                            {% url 'account_logout' as logout_url_ %}
+                            {% if logout_url_ %}
+                                <li>
+                                    <a href="{{ logout_url_ }}">Sign out</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% else %}
+                    <li><a href="/">Home</a></li>
+                    <li><a href="{% url 'account_login' %}">Log in</a></li>
+                    <li><a href="{% url 'account_signup' %}">Sign up</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content_root %}{% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p>
+            <small>django_e2e_benchmarks v{{ django_e2e_benchmarks.meta.version }} by Alberto Morón Hernández</small>
+        </p>
+    </footer>
+
+    <script nonce="{{ request.csp_nonce }}">
+        document.querySelectorAll("nav a").forEach(a => {
+            if (a.href === window.location.href) {
+                a.classList.add("inactive-link");
+            } else {
+                a.classList.remove("inactive-link");
+            }
+        });
+    </script>
+
+</body>
+
+</html>

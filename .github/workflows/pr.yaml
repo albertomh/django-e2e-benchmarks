@@ -1,0 +1,15 @@
+# Pull Request pipeline
+# Runs when a commit on a feature branch is pushed up to GitHub.
+name: PR
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches-ignore:
+      - main
+
+jobs:
+  checks:
+    uses: ./.github/workflows/_pre-build-checks.yaml

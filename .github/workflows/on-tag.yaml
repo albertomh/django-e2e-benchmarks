@@ -1,0 +1,32 @@
+# On Tag pipeline
+# Runs when a semver tag is pushed up to GitHub.
+name: on-tag
+
+on:
+  push:
+    # run this workflow only if the tag matches the format 'v<semver>'
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  checks:
+     uses: ./.github/workflows/_pre-build-checks.yaml
+     with:
+       django_checks_deploy: 'true'
+
+  containerise:
+    needs:
+      - checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          echo "REPO_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+      - uses: ./.github/actions/containerise
+        with:
+          dockerfile: _deploy/deploy.Dockerfile
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          tags:
+            ghcr.io/${{ env.REPO_NAME }}:latest,
+            ghcr.io/${{ env.REPO_NAME }}:${{ github.ref_name }},

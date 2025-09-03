@@ -1,0 +1,97 @@
+# Continuous Integration pipeline
+# Runs when a Pull Request is merged into the 'main' branch.
+#
+# Does not run the 'containerise' job for merges of the 'release-please--branches--main'
+# branch since this is handled by the `on-tag` workflow.
+name: CI
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  checks:
+    # this job is redundant if pipeline was triggered by merge of a 'Release Please' PR
+    if: ${{ github.event.pull_request.merged && github.head_ref != 'release-please--branches--main' }}
+    uses: ./.github/workflows/_pre-build-checks.yaml
+
+  containerise:
+    # containerisation of tagged releases is handled separately by the `on-tag` workflow
+    if: github.head_ref != 'release-please--branches--main'
+    needs: checks
+    runs-on: ubuntu-24.04
+    outputs:
+      image_address: ${{ steps.containerise.outputs.image_address }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          echo "REPO_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - id: containerise
+        uses: ./.github/actions/containerise
+        with:
+          dockerfile: _deploy/deploy.Dockerfile
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          tags:
+            ghcr.io/${{ env.REPO_NAME }}/${{ github.ref_name }}:latest,
+            ghcr.io/${{ env.REPO_NAME }}/${{ github.ref_name }}:${{ env.SHA_SHORT }},
+
+  e2e_test:
+    needs: containerise
+    runs-on: ubuntu-24.04
+    env:
+      USE_ENV_TEST: "1"
+      SECRET_KEY: django-insecure_not-a-secret
+      ALLOWED_HOSTS: 127.0.0.1,::1
+      CSRF_TRUSTED_ORIGINS: http://127.0.0.1
+      DATABASE_URL: postgres://django_e2e_benchmarks:password@host.docker.internal:5432/django_e2e_benchmarks
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: django_e2e_benchmarks
+          POSTGRES_USER: django_e2e_benchmarks
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.6.17"
+      - name: Apply migrations and seed database
+        run: |
+          docker run --rm \
+            --add-host=host.docker.internal:host-gateway \
+            --env USE_ENV_TEST \
+            --env SECRET_KEY \
+            --env ALLOWED_HOSTS \
+            --env CSRF_TRUSTED_ORIGINS \
+            --env DATABASE_URL \
+            ${{ needs.containerise.outputs.image_address }} \
+            /bin/bash -c "python manage.py migrate && python manage.py seed_database"
+      - name: Run webapp in the background
+        run: |
+          docker run --detach \
+            --add-host=host.docker.internal:host-gateway \
+            --env USE_ENV_TEST \
+            --env SECRET_KEY \
+            --env ALLOWED_HOSTS \
+            --env CSRF_TRUSTED_ORIGINS \
+            --env DATABASE_URL \
+            --env PORT=8000 \
+            --publish 8000:8000 \
+            --volume django_e2e_benchmarks_static:/app/static \
+            ${{ needs.containerise.outputs.image_address }}
+      - run: uv sync --group=test
+      - run: uv run playwright install --with-deps chromium
+      - run: uv run pytest tests_e2e/

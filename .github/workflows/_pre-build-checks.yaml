@@ -1,0 +1,89 @@
+# Run checks and test suite. Intended to be run ahead of building / containerising the app.
+#
+# Usage:
+# ```
+# jobs:
+#   checks:
+#     uses: ./.github/workflows/_pre-build-checks.yaml
+#     with:
+#       django_checks_deploy: 'false' | 'true'
+# ```
+name: Pre-build checks
+
+on:
+  workflow_call:
+    inputs:
+      django_checks_deploy:
+          description: 'Run checks in deploy mode'
+          type: string
+          default: 'false'
+          required: false
+
+jobs:
+  pre_commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/pre-commit
+
+  generate-nox-sessions:
+    needs:
+      - pre_commit
+    runs-on: ubuntu-24.04
+    outputs:
+      session: ${{ steps.set-matrix.outputs.session }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: wntrblm/nox@main
+      - id: set-matrix
+        shell: bash
+        run: |
+          # Extract all nox session names (both selected and skipped) into a JSON array.
+          # Session lines start with '*' or '-'.
+          sessions_json="$(
+          nox --list \
+              | grep -E '^[*-] ' \
+              | cut -d' ' -f2 \
+              | jq -R -s -c 'split("\n")[:-1]'
+          )"
+          echo "session=$sessions_json" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs:
+      - generate-nox-sessions
+    strategy:
+      fail-fast: false
+      matrix:
+        session: ${{ fromJson(needs.generate-nox-sessions.outputs.session) }}
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: django_e2e_benchmarks
+          POSTGRES_USER: django_e2e_benchmarks
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.6.17"
+      - uses: wntrblm/nox@2025.05.01
+      - run: nox --session "${{ matrix.session }}"
+
+  django:
+    needs:
+      - pre_commit
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/django-checks
+        with:
+          deploy: ${{ inputs.django_checks_deploy }}
