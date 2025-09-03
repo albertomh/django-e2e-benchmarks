@@ -18,11 +18,11 @@ on:
         required: true
         type: string
       use_playwright:
-        required: true
+        required: false
         type: boolean
         default: false
       use_pydoll:
-        required: true
+        required: false
         type: boolean
         default: false
 
