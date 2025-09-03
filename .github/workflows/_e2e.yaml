@@ -1,17 +1,34 @@
-name: E2E tests
+# Run playwright or pydoll E2E tests in CI.
+#
+# Usage:
+# ```
+# jobs:
+#   playwright_e2e:
+#     needs: containerise
+#     uses: ./.github/workflows/_e2e.yaml
+#     with:
+#      image_address: ${{ needs.containerise.outputs.image_address }}
+#       use_playwright: true
+# ```
 
 on:
   workflow_call:
     inputs:
-      use_playwright:
+      image_address:
         required: true
+        type: string
+      use_playwright:
+        required: false
+        type: boolean
+        default: false
+      use_pydoll:
+        required: false
         type: boolean
         default: false
 
 jobs:
   e2e:
     runs-on: ubuntu-24.04
-    needs: containerise
     env:
       USE_ENV_TEST: "1"
       SECRET_KEY: django-insecure_not-a-secret
@@ -47,7 +64,7 @@ jobs:
             --env ALLOWED_HOSTS \
             --env CSRF_TRUSTED_ORIGINS \
             --env DATABASE_URL \
-            ${{ needs.containerise.outputs.image_address }} \
+            ${{ inputs.image_address }} \
             /bin/bash -c "python manage.py migrate && python manage.py seed_database"
 
       - name: Run webapp in the background
@@ -62,7 +79,7 @@ jobs:
             --env PORT=8000 \
             --publish 8000:8000 \
             --volume django_e2e_benchmarks_static:/app/static \
-            ${{ needs.containerise.outputs.image_address }}
+            ${{ inputs.image_address }}
 
       - run: uv sync --group=test
 
@@ -71,3 +88,6 @@ jobs:
 
       - if: ${{ inputs.use_playwright }}
         run: uv run pytest tests_e2e/playwright_e2e/
+
+      - if: ${{ inputs.use_pydoll }}
+        run: uv run pytest tests_e2e/pydoll_e2e/
