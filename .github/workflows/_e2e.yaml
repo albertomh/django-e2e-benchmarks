@@ -7,7 +7,7 @@
 #     needs: containerise
 #     uses: ./.github/workflows/_e2e.yaml
 #     with:
-#      image_address: ${{ needs.containerise.outputs.image_address }}
+#       image_address: ${{ needs.containerise.outputs.image_address }}
 #       use_playwright: true
 # ```
 
@@ -81,9 +81,17 @@ jobs:
             --volume django_e2e_benchmarks_static:/app/static \
             ${{ inputs.image_address }}
 
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        if: ${{ inputs.use_playwright }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium
+
       - run: uv sync --group=test
 
-      - if: ${{ inputs.use_playwright }}
+      - if: ${{ inputs.use_playwright && steps.cache-playwright.outputs.cache-hit != 'true' }}
         run: uv run playwright install --with-deps chromium
 
       - if: ${{ inputs.use_playwright }}
