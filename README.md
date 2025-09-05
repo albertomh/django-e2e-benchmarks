@@ -15,6 +15,13 @@
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 [![Release Please](https://img.shields.io/badge/📦_Release_Please-6C97BB)](https://github.com/googleapis/release-please)[![gunicorn](https://img.shields.io/badge/gunicorn-f7f8f2?logo=gunicorn&logoColor=499848)](https://docs.gunicorn.org/en/latest/index.html)
 
+This repo contains a simple Django application against which to benchmark end-to-end (e2e)
+tests developed using Playwright and pydoll. It also contains utils to measure execution
+time of each e2e test suite.
+
+The Django project was generated using the [djereo](https://github.com/albertomh/djereo)
+project template.
+
 ## Prerequisites
 
 To use `django_e2e_benchmarks` the following must be available locally:
@@ -25,7 +32,9 @@ To use `django_e2e_benchmarks` the following must be available locally:
 - [just](https://github.com/casey/just)
 - [nox](https://nox.thea.codes/en/stable/)
 
-## Quickstart: run locally
+## Quickstart
+
+### Run the Django app locally
 
 A `justfile` defines common development tasks. Run `just` to show all available recipes.
 
@@ -50,6 +59,30 @@ IPython is available as the default shell. Start an interactive session with:
 
 ```sh
 just shell
+```
+
+### Run the benchmarking script
+
+```sh
+usage: benchmark.py [-h] [--target {pydoll_e2e,playwright_e2e}] [-n N]
+                    [--max-attempts MAX_ATTEMPTS]
+
+Run end-to-end test suites multiple times and report timing statistics.
+
+By default runs pytest through uv, collects wall-clock durations,
+and summarizes the minimum, maximum, and average times.
+
+options:
+  -h, --help            show this help message and exit
+  --target {pydoll_e2e,playwright_e2e}
+                        Which test directory to run (default: playwright_e2e).
+  -n N                  Number of successful runs to collect (default: 10).
+  --max-attempts MAX_ATTEMPTS
+                        Maximum attempts before giving up (default: 2 × n).
+
+Examples:
+  python benchmark.py --target pydoll_e2e -n 5
+  python benchmark.py --target playwright_e2e -n 3 --max-attempts 20
 ```
 
 ## Develop
