@@ -30,7 +30,8 @@ jobs:
       - run: |
           echo "REPO_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
           echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-      - id: containerise
+      - name: Containerise
+        id: containerise
         uses: ./.github/actions/containerise
         with:
           dockerfile: _deploy/deploy.Dockerfile

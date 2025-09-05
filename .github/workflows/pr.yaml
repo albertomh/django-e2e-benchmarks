@@ -13,3 +13,40 @@ on:
 jobs:
   checks:
     uses: ./.github/workflows/_pre-build-checks.yaml
+
+  containerise:
+    # containerisation of tagged releases is handled separately by the `on-tag` workflow
+    if: github.head_ref != 'release-please--branches--main'
+    needs: checks
+    runs-on: ubuntu-24.04
+    outputs:
+      image_address: ${{ steps.containerise.outputs.image_address }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          echo "REPO_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Containerise
+        id: containerise
+        uses: ./.github/actions/containerise
+        with:
+          dockerfile: _deploy/deploy.Dockerfile
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          tags:
+            ghcr.io/${{ env.REPO_NAME }}/${{ github.ref_name }}:latest,
+            ghcr.io/${{ env.REPO_NAME }}/${{ github.ref_name }}:${{ env.SHA_SHORT }},
+
+  playwright_e2e:
+    needs: containerise
+    uses: ./.github/workflows/_e2e.yaml
+    with:
+      image_address: ${{ needs.containerise.outputs.image_address }}
+      use_playwright: true
+
+  pydoll_e2e:
+    needs: containerise
+    uses: ./.github/workflows/_e2e.yaml
+    with:
+      image_address: ${{ needs.containerise.outputs.image_address }}
+      use_pydoll: true
