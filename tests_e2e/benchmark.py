@@ -2,9 +2,9 @@
 
 import argparse
 import json
+import re
 import statistics
 import subprocess
-import time
 from enum import Enum
 from typing import TypedDict
 
@@ -22,6 +22,9 @@ class Stats(TypedDict):
     all: list[float]
 
 
+PYTEST_TIME_PATTERN = re.compile(r"passed in ([0-9]+(?:\.[0-9]+)?)s")
+
+
 def run_pytest(testdir: Target, n: int = 5, max_attempts: int | None = None) -> Stats:
     times: list[float] = []
     attempts = 0
@@ -29,19 +32,19 @@ def run_pytest(testdir: Target, n: int = 5, max_attempts: int | None = None) -> 
 
     while len(times) < n and attempts < max_attempts:
         attempts += 1
-        start = time.perf_counter()
         try:
-            subprocess.run(
+            result = subprocess.run(
                 ["uv", "run", "pytest", f"tests_e2e/{testdir.value}/"],
                 check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                capture_output=True,
+                text=True,
             )
         except subprocess.CalledProcessError:
             continue
 
-        end = time.perf_counter()
-        times.append(end - start)
+        match = PYTEST_TIME_PATTERN.search(result.stdout + result.stderr)
+        if match:
+            times.append(float(match.group(1)))
 
     return {
         "runs": n,
@@ -57,7 +60,7 @@ if __name__ == "__main__":
         prog="benchmark.py",
         description=(
             "Run end-to-end test suites multiple times and report timing statistics.\n\n"
-            "By default runs pytest through uv, collects wall-clock durations, "
+            "Parses pytest's own reported runtime from the summary line "
             "and summarizes the minimum, maximum, and average times."
         ),
         epilog=(
