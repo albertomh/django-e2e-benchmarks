@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.0 (2025-09-05)
+
+
+### Features
+
+* Add script to benchmark e2e tests ([#7](https://github.com/albertomh/django-e2e-benchmarks/issues/7)) ([5ccc126](https://github.com/albertomh/django-e2e-benchmarks/commit/5ccc126cf088917a8040eccc099df5a981146f66))
+* **ci:** Run playwright e2e tests in CI ([#2](https://github.com/albertomh/django-e2e-benchmarks/issues/2)) ([6fdfbb7](https://github.com/albertomh/django-e2e-benchmarks/commit/6fdfbb7c404f3330a926d68dd15af546e51748c8))
+* **ci:** Run pydoll e2e tests in CI ([#5](https://github.com/albertomh/django-e2e-benchmarks/issues/5)) ([e542fc4](https://github.com/albertomh/django-e2e-benchmarks/commit/e542fc48b09ad5d36deefad00bd7832224ade543))
+
+
+### Bug Fixes
+
+* **ci:** Cache Playwright browser installations ([#6](https://github.com/albertomh/django-e2e-benchmarks/issues/6)) ([b5ce9c3](https://github.com/albertomh/django-e2e-benchmarks/commit/b5ce9c3599c3c1ef7a1f8f641be84cb6c193e45b))
+
+
+### Documentation
+
+* Add section on benchmarking script to README ([#8](https://github.com/albertomh/django-e2e-benchmarks/issues/8)) ([4e186bc](https://github.com/albertomh/django-e2e-benchmarks/commit/4e186bc02713cdeb2bbba6b46d6cd290bd3aee3b))
+
+## Changelog
+
 Notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
