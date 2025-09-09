@@ -32,8 +32,12 @@ runs:
             PYTHONDEVMODE=1 just manage check --deploy --fail-level WARNING
         else
             cp .env.in .env
-            secret=$(openssl rand -base64 50)
-            sed -i "s|^SECRET_KEY=.*|SECRET_KEY=$secret|" .env
+            # Generate a random 50-char string and set as SECRET_KEY
+            secret=$(openssl rand -base64 50 | tr -d '\n')
+            # Remove any existing SECRET_KEY line
+            grep -v '^SECRET_KEY=' .env > .env.tmp && mv .env.tmp .env
+            # Append the new SECRET_KEY
+            echo "SECRET_KEY=$secret" >> .env
             PYTHONDEVMODE=1 just manage check
         fi
       shell: bash
