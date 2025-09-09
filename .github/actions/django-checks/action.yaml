@@ -32,6 +32,8 @@ runs:
             PYTHONDEVMODE=1 just manage check --deploy --fail-level WARNING
         else
             cp .env.in .env
+            secret=$(openssl rand -base64 50)
+            sed -i "s|^SECRET_KEY=.*|SECRET_KEY=$secret|" .env
             PYTHONDEVMODE=1 just manage check
         fi
       shell: bash
