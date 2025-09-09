@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/albertomh/django-e2e-benchmarks/compare/v0.1.2...v0.1.3) (2025-09-09)
+
+
+### Bug Fixes
+
+* **ci:** Ensure caller workflow passes secrets to django-checks job ([#18](https://github.com/albertomh/django-e2e-benchmarks/issues/18)) ([616d3f2](https://github.com/albertomh/django-e2e-benchmarks/commit/616d3f2442d49163e5dc8237857ea0667abefb1a))
+
 ## [0.1.2](https://github.com/albertomh/django-e2e-benchmarks/compare/v0.1.1...v0.1.2) (2025-09-09)
 
 
