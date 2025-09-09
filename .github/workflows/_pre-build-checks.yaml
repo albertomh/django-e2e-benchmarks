@@ -87,3 +87,4 @@ jobs:
       - uses: ./.github/actions/django-checks
         with:
           deploy: ${{ inputs.django_checks_deploy }}
+          django-secret-key: ${{ secrets.DJANGO_SECRET_KEY }}
