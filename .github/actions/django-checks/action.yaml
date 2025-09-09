@@ -18,6 +18,10 @@ inputs:
     description: 'Run checks in deploy mode'
     required: false
     default: 'false'
+  django-secret-key:
+    description: 'Secret key for the Django webapp'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -28,13 +32,9 @@ runs:
     - uses: extractions/setup-just@v3
     - run: |
         if [[ "${{ inputs.deploy }}" == "true" ]]; then
-            if [[ -z "${{ secrets.DJANGO_SECRET_KEY }}" ]]; then
-                echo "❌ ERROR: secrets.DJANGO_SECRET_KEY is not set in GitHub Actions."
-                exit 1
-            fi
             cp _deploy/.env.deploy .env
             grep -v '^SECRET_KEY=' .env > .env.tmp && mv .env.tmp .env
-            echo "SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
+            echo "SECRET_KEY=${{ inputs.django-secret-key }}" >> .env
             PYTHONDEVMODE=1 just manage check --deploy --fail-level WARNING
         else
             cp .env.in .env
