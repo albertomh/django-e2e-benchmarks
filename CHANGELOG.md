@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.1](https://github.com/albertomh/django-e2e-benchmarks/compare/v0.1.0...v0.1.1) (2025-09-09)
+
+
+### Bug Fixes
+
+* **ci:** Escape SECRET_KEY when generating in django-checks ([#13](https://github.com/albertomh/django-e2e-benchmarks/issues/13)) ([be09220](https://github.com/albertomh/django-e2e-benchmarks/commit/be092205b457bca59721f45948e2ae52a3095501))
+* **ci:** Generate random key for django-checks action ([#12](https://github.com/albertomh/django-e2e-benchmarks/issues/12)) ([e3905d4](https://github.com/albertomh/django-e2e-benchmarks/commit/e3905d4dac24ea4d58b73fab44d19618949f6e7e))
+* **ci:** Use Django secret key in webapp used by e2e in CI ([#10](https://github.com/albertomh/django-e2e-benchmarks/issues/10)) ([7756d81](https://github.com/albertomh/django-e2e-benchmarks/commit/7756d81cd23b53946cba022461a91c2489ee1910))
+
 ## 0.1.0 (2025-09-05)
 
 
