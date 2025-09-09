@@ -1,7 +1,7 @@
 # https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 [project]
 name = "django_e2e_benchmarks"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = [
   {name = "Alberto Morón Hernández", email = "alberto.moronh@gmail.com"}
