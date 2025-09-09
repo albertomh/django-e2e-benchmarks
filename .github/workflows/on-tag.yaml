@@ -10,9 +10,11 @@ on:
 
 jobs:
   checks:
-     uses: ./.github/workflows/_pre-build-checks.yaml
-     with:
-       django_checks_deploy: 'true'
+    uses: ./.github/workflows/_pre-build-checks.yaml
+    with:
+      django_checks_deploy: 'true'
+    secrets:
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
 
   containerise:
     needs:
