@@ -18,6 +18,9 @@ on:
           type: string
           default: 'false'
           required: false
+    secrets:
+      DJANGO_SECRET_KEY:
+        required: false
 
 jobs:
   pre_commit:
