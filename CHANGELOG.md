@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/albertomh/django-e2e-benchmarks/compare/v0.1.1...v0.1.2) (2025-09-09)
+
+
+### Bug Fixes
+
+* **ci:** In django-checks job, use GHA secret if in deploy mode ([#15](https://github.com/albertomh/django-e2e-benchmarks/issues/15)) ([033d528](https://github.com/albertomh/django-e2e-benchmarks/commit/033d52804c8af9e8b5f29dab3c7a09a7e62054c3))
+* **ci:** Pass secret.DJANGO_SECRET_KEY as input to django-checks job ([#17](https://github.com/albertomh/django-e2e-benchmarks/issues/17)) ([c4e962c](https://github.com/albertomh/django-e2e-benchmarks/commit/c4e962cb0c74b9271dc4bb2aa9ed9c62dd0b7ce1))
+
 ## [0.1.1](https://github.com/albertomh/django-e2e-benchmarks/compare/v0.1.0...v0.1.1) (2025-09-09)
 
 
