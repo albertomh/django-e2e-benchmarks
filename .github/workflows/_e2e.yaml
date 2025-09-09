@@ -10,6 +10,12 @@
 #       image_address: ${{ needs.containerise.outputs.image_address }}
 #       use_playwright: true
 # ```
+#
+# IMPORTANT!
+# The following click-ops step must be taken to allow end-to-end (e2e) tests to run:
+#   1. Create a random secret key 50 that is characters or longer.
+#   2. Populate a GitHub Actions secret called `DJANGO_SECRET_KEY` in
+#      `github.com/<user>/<repo>/settings/secrets/actions`.
 
 on:
   workflow_call:
@@ -31,7 +37,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       USE_ENV_TEST: "1"
-      SECRET_KEY: django-insecure_not-a-secret
+      SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       ALLOWED_HOSTS: 127.0.0.1,::1
       CSRF_TRUSTED_ORIGINS: http://127.0.0.1
       DATABASE_URL: postgres://django_e2e_benchmarks:password@host.docker.internal:5432/django_e2e_benchmarks
