@@ -28,16 +28,16 @@ runs:
     - uses: extractions/setup-just@v3
     - run: |
         if [[ "${{ inputs.deploy }}" == "true" ]]; then
+            if [[ -z "${{ secrets.DJANGO_SECRET_KEY }}" ]]; then
+                echo "❌ ERROR: secrets.DJANGO_SECRET_KEY is not set in GitHub Actions."
+                exit 1
+            fi
             cp _deploy/.env.deploy .env
+            grep -v '^SECRET_KEY=' .env > .env.tmp && mv .env.tmp .env
+            echo "SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
             PYTHONDEVMODE=1 just manage check --deploy --fail-level WARNING
         else
             cp .env.in .env
-            # Generate a random 50-char string and set as SECRET_KEY
-            secret=$(openssl rand -base64 50 | tr -d '\n')
-            # Remove any existing SECRET_KEY line
-            grep -v '^SECRET_KEY=' .env > .env.tmp && mv .env.tmp .env
-            # Append the new SECRET_KEY
-            echo "SECRET_KEY=$secret" >> .env
             PYTHONDEVMODE=1 just manage check
         fi
       shell: bash
