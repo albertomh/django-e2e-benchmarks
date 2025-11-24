@@ -26,7 +26,7 @@ jobs:
   pre_commit:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/pre-commit
 
   generate-nox-sessions:
@@ -36,7 +36,7 @@ jobs:
     outputs:
       session: ${{ steps.set-matrix.outputs.session }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: wntrblm/nox@main
       - id: set-matrix
         shell: bash
@@ -74,7 +74,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v6
         with:
           version: "0.6.17"
@@ -86,7 +86,7 @@ jobs:
       - pre_commit
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/django-checks
         with:
           deploy: ${{ inputs.django_checks_deploy }}
